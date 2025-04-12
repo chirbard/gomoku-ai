@@ -1,5 +1,6 @@
 import torch
 import torch.nn.functional as F
+device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 
 
 def train(net, data, epochs=5, lr=1e-3):
@@ -8,10 +9,11 @@ def train(net, data, epochs=5, lr=1e-3):
     for epoch in range(epochs):
         total_loss = 0
         for state, target_pi, target_v in data:
-            state = state.unsqueeze(0)  # shape: [1, 2, 6, 6]
-            target_pi = torch.tensor(target_pi).unsqueeze(0)  # [1, 36]
-            target_v = torch.tensor(
-                [[target_v]], dtype=torch.float32)  # [1, 1]
+            state = state.unsqueeze(0).to(device)  # Move to GPU
+            target_pi = torch.tensor(target_pi).unsqueeze(
+                0).to(device)  # Move to GPU
+            target_v = torch.tensor([[target_v]], dtype=torch.float32).to(
+                device)  # Move to GPU
 
             log_pi_pred, v_pred = net(state)
 

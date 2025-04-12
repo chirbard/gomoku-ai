@@ -3,6 +3,7 @@ from collections import defaultdict
 import numpy as np
 import torch
 from encode_board import encode_board
+device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 
 
 class MCTS:
@@ -40,7 +41,7 @@ class MCTS:
         legal_moves = self._legal_moves(game)
         if s not in self.P:
             # Leaf node: use neural network to evaluate
-            input_tensor = encode_board(game).unsqueeze(0)
+            input_tensor = encode_board(game).unsqueeze(0).to(device)
             with torch.no_grad():
                 log_policy, value = self.net(input_tensor)
             policy = torch.exp(log_policy).squeeze(0).cpu().numpy()

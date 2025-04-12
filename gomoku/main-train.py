@@ -5,7 +5,7 @@ from mcts import MCTS
 from playselfgame import play_self_game
 from train import train
 import torch
-# device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 
 # game = Gomoku()
 # net = GomokuNet()
@@ -15,8 +15,8 @@ import torch
 # for move, prob in sorted(probs.items(), key=lambda x: -x[1])[:5]:
 #     print(f"Move {move}: {prob:.2f}")
 
-net = GomokuNet()
-# net = GomokuNet().to(device)
+# net = GomokuNet()
+net = GomokuNet().to(device)
 
 for iteration in range(10):
     print(f"=== Self-play iteration {iteration + 1} ===")

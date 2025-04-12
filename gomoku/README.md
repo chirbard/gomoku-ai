@@ -1,0 +1,1 @@
+https://nikcheerla.github.io/deeplearningschool/2018/01/01/AlphaZero-Explained/

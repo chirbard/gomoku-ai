@@ -10,8 +10,8 @@ device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 
 # net = GomokuNet()
 net = GomokuNet().to(device)
-ITERATIONS = 5
-GAMES_PER_ITERATION = 50
+ITERATIONS = 50
+GAMES_PER_ITERATION = 100
 EPOCHS = 400
 SIMULATIONS = 50
 BATCH_SIZE = 1024

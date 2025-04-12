@@ -1,10 +1,11 @@
 import torch
 import torch.nn as nn
 import torch.nn.functional as F
+from constants import BOARD_SIZE
 
 
 class GomokuNet(nn.Module):
-    def __init__(self, board_size=6):
+    def __init__(self, board_size=BOARD_SIZE):
         super().__init__()
         self.board_size = board_size
 

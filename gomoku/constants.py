@@ -1,0 +1,2 @@
+BOARD_SIZE = 4
+WIN_LENGTH = 3

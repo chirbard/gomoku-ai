@@ -2,9 +2,10 @@ from gomoku import Gomoku
 from encode_board import encode_board
 import numpy as np
 from mcts import MCTS
+from constants import BOARD_SIZE
 
 
-def play_self_game(net, board_size=6, sims=50):
+def play_self_game(net, board_size=BOARD_SIZE, sims=50):
     game = Gomoku(size=board_size)
     mcts = MCTS(net, num_simulations=sims)
     memory = []

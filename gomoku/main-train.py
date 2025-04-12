@@ -10,16 +10,19 @@ device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 
 # net = GomokuNet()
 net = GomokuNet().to(device)
-ITERATIONS = 10
-GAMES_PER_ITERATION = 45
-EPOCHS = 10
+ITERATIONS = 5
+GAMES_PER_ITERATION = 50
+EPOCHS = 400
 SIMULATIONS = 50
-BATCH_SIZE = 512
+BATCH_SIZE = 1024
 
-# 🔧 What You Increase	        🧠 What It Improves	                       Time Cost
-# Iteration count               Long-term learning, generalization          High
-# Game count per iteration	    More diverse data per iteration	            Medium
-# Epochs per iteration	        Better fitting to current data	            Low
+# | What You Increase           | What It Improves                      | Time Cost
+# ----------------------------------------------------------------------------------
+# | Iteration count             | Long-term learning, generalization    | High
+# | Game count per iteration    | More diverse data per iteration       | Medium
+# | Epochs per iteration        | Better fitting to current data        | Low
+# | Simulation count per game   | Better move selection per game        | High
+# | Training batch size         | Faster epochs                         | Medium
 
 start_time = time.time()
 for iteration in range(ITERATIONS):

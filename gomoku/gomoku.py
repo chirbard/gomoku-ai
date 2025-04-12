@@ -1,8 +1,9 @@
 import numpy as np
+from constants import WIN_LENGTH, BOARD_SIZE
 
 
 class Gomoku:
-    def __init__(self, size=6, win_length=5):
+    def __init__(self, size=BOARD_SIZE, win_length=WIN_LENGTH):
         self.size = size
         self.win_length = win_length
         self.board = np.zeros((size, size), dtype=int)

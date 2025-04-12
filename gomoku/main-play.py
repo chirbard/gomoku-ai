@@ -6,14 +6,13 @@ from train import train
 import torch
 
 # Step 1: Init
-# net = GomokuNet()
 device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 net = GomokuNet().to(device)
 net.load_state_dict(torch.load("gomoku_net.pt"))  # optional if you trained it
 net.eval()
 
 # Step 2: New game
-game = Gomoku(size=6)
+game = Gomoku()
 
 # Step 3: Setup MCTS
 mcts = MCTS(net, num_simulations=50)

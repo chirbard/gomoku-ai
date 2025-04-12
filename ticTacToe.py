@@ -2,8 +2,8 @@ import numpy as np
 import pickle
 import os
 
-BOARD_ROWS = 4
-BOARD_COLS = 4
+BOARD_ROWS = 3
+BOARD_COLS = 3
 SEQUENCE_LENGTH = 3
 
 
@@ -18,9 +18,31 @@ class State:
         self.playerSymbol = 1
 
     # get unique hash of current board state
+    # def getHash(self):
+    #     self.boardHash = str(self.board.reshape(BOARD_COLS * BOARD_ROWS))
+    #     return self.boardHash
     def getHash(self):
-        self.boardHash = str(self.board.reshape(BOARD_COLS * BOARD_ROWS))
-        return self.boardHash
+        # Generate all 4 rotations of the board
+        hashes = []
+        board = self.board
+        for rotation in range(4):
+            board = np.rot90(board)  # Rotate the board 90 degrees
+            board_hash = str(board.reshape(BOARD_COLS * BOARD_ROWS))
+            hashes.append((board_hash, rotation))
+        # Return the smallest hash and its corresponding rotation
+        self.boardHash, rotation = min(hashes, key=lambda x: x[0])
+        return self.boardHash, rotation
+
+    @staticmethod
+    def getHashStatic(board):
+        # Generate all 4 rotations of the board
+        hashes = []
+        for rotation in range(4):
+            board = np.rot90(board)
+            board_hash = str(board.reshape(BOARD_COLS * BOARD_ROWS))
+            hashes.append((board_hash, rotation))
+        # Return the smallest hash and its corresponding rotation
+        return min(hashes, key=lambda x: x[0])
 
     def winner(self, sequence_length=SEQUENCE_LENGTH):
         # row
@@ -241,13 +263,23 @@ class Player:
     def decayExploration(self):
         self.exp_rate = max(self.min_exp_rate, self.exp_rate * self.decay_rate)
 
-    def getHash(self, board):
-        boardHash = str(board.reshape(BOARD_COLS * BOARD_ROWS))
-        return boardHash
+    # def getHash(self, board):
+    #     boardHash = str(board.reshape(BOARD_COLS * BOARD_ROWS))
+    #     return boardHash
+
+    def unrotateAction(self, action, rotation):
+        row, col = action
+        for _ in range(rotation):
+            # Reverse the rotation (rotate 90° counterclockwise)
+            row, col = col, BOARD_ROWS - 1 - row
+        return row, col
 
     def chooseAction(self, positions, current_board, symbol):
+        # Get the canonical hash and the number of rotations
+        canonical_hash, rotation = State.getHashStatic(current_board)
+
         if np.random.uniform(0, 1) <= self.exp_rate:
-            # take random action
+            # Take random action
             idx = np.random.choice(len(positions))
             action = positions[idx]
         else:
@@ -255,13 +287,14 @@ class Player:
             for p in positions:
                 next_board = current_board.copy()
                 next_board[p] = symbol
-                next_boardHash = self.getHash(next_board)
+                next_boardHash, _ = State.getHashStatic(next_board)
                 value = 0 if self.states_value.get(next_boardHash) is None else self.states_value.get(next_boardHash)
-                # print("value", value)
                 if value >= value_max:
                     value_max = value
                     action = p
-        # print("{} takes action {}".format(self.name, action))
+
+        # Unrotate the action to match the original board orientation
+        action = self.unrotateAction(action, rotation)
         return action
 
     # append a hash state
@@ -327,15 +360,15 @@ class HumanPlayer:
 
 if __name__ == "__main__":
     # ------- training --------
-    # p1 = Player("p1")
-    # p2 = Player("p2")
+    p1 = Player("p1")
+    p2 = Player("p2")
 
-    # st = State(p1, p2)
-    # print("training...")
-    # st.play(50000)
-    # p1.savePolicy()
-    # p2.savePolicy()
-    # print("training done!")
+    st = State(p1, p2)
+    print("training...")
+    st.play(50000)
+    p1.savePolicy()
+    p2.savePolicy()
+    print("training done!")
     # ------- traning end --------
 
     # ------- continue training --------

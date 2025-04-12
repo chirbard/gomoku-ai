@@ -344,15 +344,15 @@ class HumanPlayer:
 
 if __name__ == "__main__":
     # ------- training --------
-    p1 = Player("p1")
-    p2 = Player("p2")
+    # p1 = Player("p1")
+    # p2 = Player("p2")
 
-    st = State(p1, p2)
-    print("training...")
-    st.play(50000)
-    p1.savePolicy()
-    p2.savePolicy()
-    print("training done!")
+    # st = State(p1, p2)
+    # print("training...")
+    # st.play(50000)
+    # p1.savePolicy()
+    # p2.savePolicy()
+    # print("training done!")
     # ------- traning end --------
 
     # ------- continue training --------

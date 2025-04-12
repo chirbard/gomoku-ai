@@ -1,15 +1,17 @@
 import numpy as np
 import pickle
 import os
+import torch
+import time
 
-BOARD_ROWS = 4
-BOARD_COLS = 4
+BOARD_ROWS = 3
+BOARD_COLS = 3
 SEQUENCE_LENGTH = 3
 
 
 class State:
     def __init__(self, p1, p2):
-        self.board = np.zeros((BOARD_ROWS, BOARD_COLS))
+        self.board = torch.zeros((BOARD_ROWS, BOARD_COLS), device='cuda')
         self.p1 = p1
         self.p2 = p2
         self.isEnd = False
@@ -25,28 +27,31 @@ class State:
     def winner(self, sequence_length=SEQUENCE_LENGTH):
         # row
         for i in range(BOARD_ROWS):
-            for j in range(BOARD_COLS - sequence_length + 1):  # Ensure we have enough elements to check
-                if sum(self.board[i, j:j+sequence_length]) == sequence_length:
+            # Ensure we have enough elements to check
+            for j in range(BOARD_COLS - sequence_length + 1):
+                if torch.sum(self.board[i, j:j+sequence_length]) == sequence_length:
                     self.isEnd = True
                     return 1
-                if sum(self.board[i, j:j+sequence_length]) == -sequence_length:
+                if torch.sum(self.board[i, j:j+sequence_length]) == -sequence_length:
                     self.isEnd = True
                     return -1
 
         # col
         for i in range(BOARD_COLS):
-            for j in range(BOARD_ROWS - sequence_length + 1):  # Ensure we have enough elements to check
-                if sum(self.board[j:j+sequence_length, i]) == sequence_length:
+            # Ensure we have enough elements to check
+            for j in range(BOARD_ROWS - sequence_length + 1):
+                if torch.sum(self.board[j:j+sequence_length, i]) == sequence_length:
                     self.isEnd = True
                     return 1
-                if sum(self.board[j:j+sequence_length, i]) == -sequence_length:
+                if torch.sum(self.board[j:j+sequence_length, i]) == -sequence_length:
                     self.isEnd = True
                     return -1
 
         # diagonal (top-left to bottom-right)
         for i in range(BOARD_ROWS - sequence_length + 1):
             for j in range(BOARD_COLS - sequence_length + 1):
-                diag_sum1 = sum([self.board[i+k, j+k] for k in range(sequence_length)])
+                diag_sum1 = torch.sum(torch.stack(
+                    [self.board[i+k, j+k] for k in range(sequence_length)]))
                 if diag_sum1 == sequence_length:
                     self.isEnd = True
                     return 1
@@ -57,7 +62,8 @@ class State:
         # diagonal (top-right to bottom-left)
         for i in range(BOARD_ROWS - sequence_length + 1):
             for j in range(sequence_length - 1, BOARD_COLS):
-                diag_sum2 = sum([self.board[i+k, j-k] for k in range(sequence_length)])
+                diag_sum2 = torch.sum(torch.stack(
+                    [self.board[i+k, j-k] for k in range(sequence_length)]))
                 if diag_sum2 == sequence_length:
                     self.isEnd = True
                     return 1
@@ -107,34 +113,38 @@ class State:
 
     # board reset
     def reset(self):
-        self.board = np.zeros((BOARD_ROWS, BOARD_COLS))
+        self.board = torch.zeros((BOARD_ROWS, BOARD_COLS), device='cuda')
         self.boardHash = None
         self.isEnd = False
         self.playerSymbol = 1
 
     def play(self, rounds=100):
+        start_time = time.time()
         for i in range(rounds):
             # print("Rounds {}".format(i))
             if i % 10 == 0:
-                print("Rounds {}".format(i))
+                end_time = time.time()
+                print("Rounds {} Time: {}".format(i, end_time - start_time))
+                start_time = end_time
             if i % 100 == 0:
                 # create a checkpoint
                 print("Checkpoint... {}".format(i))
                 self.p1.saveCheckpoint(i)
                 self.p2.saveCheckpoint(i)
-                print("exploration rate p1: {}, p2: {}".format(self.p1.exp_rate, self.p2.exp_rate))
+                print("exploration rate p1: {}, p2: {}".format(
+                    self.p1.exp_rate, self.p2.exp_rate))
 
             number_of_actions = 0
             while not self.isEnd:
                 # Player 1
                 positions = self.availablePositions()
-                p1_action = self.p1.chooseAction(positions, self.board, self.playerSymbol)
+                p1_action = self.p1.chooseAction(
+                    positions, self.board, self.playerSymbol)
                 number_of_actions += 1
                 # take action and upate board state
                 self.updateState(p1_action)
                 board_hash = self.getHash()
                 self.p1.addState(board_hash)
-                
 
                 # check board status if it is end
                 win = self.winner()
@@ -150,12 +160,12 @@ class State:
                 else:
                     # Player 2
                     positions = self.availablePositions()
-                    p2_action = self.p2.chooseAction(positions, self.board, self.playerSymbol)
+                    p2_action = self.p2.chooseAction(
+                        positions, self.board, self.playerSymbol)
                     number_of_actions += 1
                     self.updateState(p2_action)
                     board_hash = self.getHash()
                     self.p2.addState(board_hash)
-                    
 
                     win = self.winner()
                     if win is not None:
@@ -175,7 +185,8 @@ class State:
         while not self.isEnd:
             # Player 1
             positions = self.availablePositions()
-            p1_action = self.p1.chooseAction(positions, self.board, self.playerSymbol)
+            p1_action = self.p1.chooseAction(
+                positions, self.board, self.playerSymbol)
             # take action and upate board state
             self.updateState(p1_action)
             self.showBoard()
@@ -238,6 +249,7 @@ class Player:
     Exploration rate decay.
     As the training progresses, the exploration rate decreases, allowing the agent to exploit its learned policy more.
     '''
+
     def decayExploration(self):
         self.exp_rate = max(self.min_exp_rate, self.exp_rate * self.decay_rate)
 
@@ -246,17 +258,20 @@ class Player:
         return boardHash
 
     def chooseAction(self, positions, current_board, symbol):
-        if np.random.uniform(0, 1) <= self.exp_rate:
+        if torch.rand(1).item() <= self.exp_rate:
             # take random action
-            idx = np.random.choice(len(positions))
+            idx = torch.randint(0, len(positions), (1,)).item()
             action = positions[idx]
         else:
             value_max = -999
             for p in positions:
-                next_board = current_board.copy()
+                if not isinstance(current_board, torch.Tensor):
+                    current_board = torch.tensor(current_board, device='cuda')
+                next_board = current_board.clone()
                 next_board[p] = symbol
                 next_boardHash = self.getHash(next_board)
-                value = 0 if self.states_value.get(next_boardHash) is None else self.states_value.get(next_boardHash)
+                value = 0 if self.states_value.get(
+                    next_boardHash) is None else self.states_value.get(next_boardHash)
                 # print("value", value)
                 if value >= value_max:
                     value_max = value
@@ -273,7 +288,8 @@ class Player:
         for st in reversed(self.states):
             if self.states_value.get(st) is None:
                 self.states_value[st] = 0
-            self.states_value[st] += self.lr * (self.decay_gamma * reward - self.states_value[st])
+            self.states_value[st] += self.lr * \
+                (self.decay_gamma * reward - self.states_value[st])
             reward = self.states_value[st]
 
     def reset(self):
@@ -287,10 +303,11 @@ class Player:
         except FileNotFoundError:
             with open('policy_' + str(self.name) + '.pkl', 'wb') as fw:
                 pickle.dump(self.states_value, fw)
-    
+
     def saveCheckpoint(self, generation):
         os.makedirs('checkpoints', exist_ok=True)
-        file_path = os.path.join('checkpoints', 'policy_' + str(self.name) + '_' + str(generation) + '.pkl')
+        file_path = os.path.join(
+            'checkpoints', 'policy_' + str(self.name) + '_' + str(generation) + '.pkl')
         with open(file_path, 'wb') as fw:
             pickle.dump(self.states_value, fw)
 
@@ -327,15 +344,15 @@ class HumanPlayer:
 
 if __name__ == "__main__":
     # ------- training --------
-    # p1 = Player("p1")
-    # p2 = Player("p2")
+    p1 = Player("p1")
+    p2 = Player("p2")
 
-    # st = State(p1, p2)
-    # print("training...")
-    # st.play(50000)
-    # p1.savePolicy()
-    # p2.savePolicy()
-    # print("training done!")
+    st = State(p1, p2)
+    print("training...")
+    st.play(50000)
+    p1.savePolicy()
+    p2.savePolicy()
+    print("training done!")
     # ------- traning end --------
 
     # ------- continue training --------
@@ -350,8 +367,6 @@ if __name__ == "__main__":
     # p2.savePolicy()
     # print("Continuing training done!")
     # ------- continue training end --------
-
-
 
     # play with human
     p1 = Player("computer", exp_rate=0)

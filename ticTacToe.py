@@ -2,8 +2,9 @@ import numpy as np
 import pickle
 import os
 
-BOARD_ROWS = 6
-BOARD_COLS = 6
+BOARD_ROWS = 4
+BOARD_COLS = 4
+SEQUENCE_LENGTH = 3
 
 
 class State:
@@ -21,46 +22,46 @@ class State:
         self.boardHash = str(self.board.reshape(BOARD_COLS * BOARD_ROWS))
         return self.boardHash
 
-    def winner(self):
+    def winner(self, sequence_length=SEQUENCE_LENGTH):
         # row
         for i in range(BOARD_ROWS):
-            for j in range(BOARD_COLS - 4):  # Ensure we have at least 5 elements to check
-                if sum(self.board[i, j:j+5]) == 5:
+            for j in range(BOARD_COLS - sequence_length + 1):  # Ensure we have enough elements to check
+                if sum(self.board[i, j:j+sequence_length]) == sequence_length:
                     self.isEnd = True
                     return 1
-                if sum(self.board[i, j:j+5]) == -5:
+                if sum(self.board[i, j:j+sequence_length]) == -sequence_length:
                     self.isEnd = True
                     return -1
 
         # col
         for i in range(BOARD_COLS):
-            for j in range(BOARD_ROWS - 4):  # Ensure we have at least 5 elements to check
-                if sum(self.board[j:j+5, i]) == 5:
+            for j in range(BOARD_ROWS - sequence_length + 1):  # Ensure we have enough elements to check
+                if sum(self.board[j:j+sequence_length, i]) == sequence_length:
                     self.isEnd = True
                     return 1
-                if sum(self.board[j:j+5, i]) == -5:
+                if sum(self.board[j:j+sequence_length, i]) == -sequence_length:
                     self.isEnd = True
                     return -1
 
         # diagonal (top-left to bottom-right)
-        for i in range(BOARD_ROWS - 4):
-            for j in range(BOARD_COLS - 4):
-                diag_sum1 = sum([self.board[i+k, j+k] for k in range(5)])
-                if diag_sum1 == 5:
+        for i in range(BOARD_ROWS - sequence_length + 1):
+            for j in range(BOARD_COLS - sequence_length + 1):
+                diag_sum1 = sum([self.board[i+k, j+k] for k in range(sequence_length)])
+                if diag_sum1 == sequence_length:
                     self.isEnd = True
                     return 1
-                if diag_sum1 == -5:
+                if diag_sum1 == -sequence_length:
                     self.isEnd = True
                     return -1
 
         # diagonal (top-right to bottom-left)
-        for i in range(BOARD_ROWS - 4):
-            for j in range(4, BOARD_COLS):
-                diag_sum2 = sum([self.board[i+k, j-k] for k in range(5)])
-                if diag_sum2 == 5:
+        for i in range(BOARD_ROWS - sequence_length + 1):
+            for j in range(sequence_length - 1, BOARD_COLS):
+                diag_sum2 = sum([self.board[i+k, j-k] for k in range(sequence_length)])
+                if diag_sum2 == sequence_length:
                     self.isEnd = True
                     return 1
-                if diag_sum2 == -5:
+                if diag_sum2 == -sequence_length:
                     self.isEnd = True
                     return -1
 

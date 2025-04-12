@@ -273,16 +273,16 @@ class Player:
 
     def savePolicy(self):
         try:
-            fw = open('policy_' + str(self.name), 'wb')
+            fw = open('policy_' + str(self.name) + '.pkl', 'wb')
             pickle.dump(self.states_value, fw)
             fw.close()
         except FileNotFoundError:
-            with open('policy_' + str(self.name), 'wb') as fw:
+            with open('policy_' + str(self.name) + '.pkl', 'wb') as fw:
                 pickle.dump(self.states_value, fw)
     
     def saveCheckpoint(self, generation):
         os.makedirs('checkpoints', exist_ok=True)
-        file_path = os.path.join('checkpoints', 'policy_' + str(self.name) + '_' + str(generation))
+        file_path = os.path.join('checkpoints', 'policy_' + str(self.name) + '_' + str(generation) + '.pkl')
         with open(file_path, 'wb') as fw:
             pickle.dump(self.states_value, fw)
 
@@ -332,9 +332,9 @@ if __name__ == "__main__":
 
     # ------- continue training --------
     # p1 = Player("p1")
-    # p1.loadPolicy("policy_p1")
+    # p1.loadPolicy("policy_p1.pkl")
     # p2 = Player("p2")
-    # p2.loadPolicy("policy_p2")
+    # p2.loadPolicy("policy_p2.pkl")
     # st = State(p1, p2)
     # print("Continuing training...")
     # st.play(10000)
@@ -347,7 +347,7 @@ if __name__ == "__main__":
 
     # play with human
     p1 = Player("computer", exp_rate=0)
-    p1.loadPolicy("policy_p1")
+    p1.loadPolicy("policy_p1.pkl")
 
     p2 = HumanPlayer("human")
 

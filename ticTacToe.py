@@ -89,18 +89,21 @@ class State:
         self.playerSymbol = -1 if self.playerSymbol == 1 else 1
 
     # only when game ends
-    def giveReward(self):
+    def giveReward(self, number_of_actions):
         result = self.winner()
+
+        max_actions = BOARD_ROWS * BOARD_COLS
+        reward_multiplier = max(0.1, 1 - (number_of_actions / max_actions))
         # backpropagate reward
         if result == 1:
-            self.p1.feedReward(1)
+            self.p1.feedReward(1 * reward_multiplier)
             self.p2.feedReward(0)
         elif result == -1:
             self.p1.feedReward(0)
-            self.p2.feedReward(1)
+            self.p2.feedReward(1 * reward_multiplier)
         else:
-            self.p1.feedReward(0.1)
-            self.p2.feedReward(0.5)
+            self.p1.feedReward(0.1 * reward_multiplier)
+            self.p2.feedReward(0.5 * reward_multiplier)
 
     # board reset
     def reset(self):
@@ -121,21 +124,24 @@ class State:
                 self.p2.saveCheckpoint(i)
                 print("exploration rate p1: {}, p2: {}".format(self.p1.exp_rate, self.p2.exp_rate))
 
+            number_of_actions = 0
             while not self.isEnd:
                 # Player 1
                 positions = self.availablePositions()
                 p1_action = self.p1.chooseAction(positions, self.board, self.playerSymbol)
+                number_of_actions += 1
                 # take action and upate board state
                 self.updateState(p1_action)
                 board_hash = self.getHash()
                 self.p1.addState(board_hash)
-                # check board status if it is end
+                
 
+                # check board status if it is end
                 win = self.winner()
                 if win is not None:
                     # self.showBoard()
                     # ended with p1 either win or draw
-                    self.giveReward()
+                    self.giveReward(number_of_actions)
                     self.p1.reset()
                     self.p2.reset()
                     self.reset()
@@ -145,15 +151,17 @@ class State:
                     # Player 2
                     positions = self.availablePositions()
                     p2_action = self.p2.chooseAction(positions, self.board, self.playerSymbol)
+                    number_of_actions += 1
                     self.updateState(p2_action)
                     board_hash = self.getHash()
                     self.p2.addState(board_hash)
+                    
 
                     win = self.winner()
                     if win is not None:
                         # self.showBoard()
                         # ended with p2 either win or draw
-                        self.giveReward()
+                        self.giveReward(number_of_actions)
                         self.p1.reset()
                         self.p2.reset()
                         self.reset()
@@ -221,7 +229,7 @@ class Player:
         self.states = []  # record all positions taken
         self.lr = 0.2
         self.exp_rate = exp_rate
-        self.decay_rate = 1 - 10e-4
+        self.decay_rate = 1 - 10e-5
         self.min_exp_rate = 0.01
         self.decay_gamma = 0.9
         self.states_value = {}  # state -> value
@@ -324,7 +332,7 @@ if __name__ == "__main__":
 
     # st = State(p1, p2)
     # print("training...")
-    # st.play(5000)
+    # st.play(50000)
     # p1.savePolicy()
     # p2.savePolicy()
     # print("training done!")

@@ -2,12 +2,13 @@ from gomoku import Gomoku
 from encode_board import encode_board
 from gomokunet import GomokuNet
 from mcts import MCTS
-from playselfgame import play_self_game
 from train import train
 import torch
 
 # Step 1: Init
-net = GomokuNet()
+# net = GomokuNet()
+device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+net = GomokuNet().to(device)
 net.load_state_dict(torch.load("gomoku_net.pt"))  # optional if you trained it
 net.eval()
 

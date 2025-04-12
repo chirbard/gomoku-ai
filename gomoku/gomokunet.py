@@ -43,10 +43,3 @@ class GomokuNet(nn.Module):
         value = torch.tanh(self.value_fc2(v))  # Output between -1 and 1
 
         return policy, value
-
-
-# net = GomokuNet()
-# dummy_input = torch.randn(1, 2, 6, 6)  # batch of 1 game
-# log_policy, value = net(dummy_input)
-# print("Log Policy:", log_policy.shape)  # [1, 36]
-# print("Value:", value.shape)            # [1, 1]

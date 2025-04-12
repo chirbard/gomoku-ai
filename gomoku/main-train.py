@@ -4,29 +4,37 @@ from gomokunet import GomokuNet
 from mcts import MCTS
 from playselfgame import play_self_game
 from train import train
+import time
 import torch
 device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 
-# game = Gomoku()
-# net = GomokuNet()
-# mcts = MCTS(net, num_simulations=50)
-
-# probs = mcts.get_action_probs(game, temperature=1.0)
-# for move, prob in sorted(probs.items(), key=lambda x: -x[1])[:5]:
-#     print(f"Move {move}: {prob:.2f}")
-
 # net = GomokuNet()
 net = GomokuNet().to(device)
+ITERATIONS = 10
+GAMES_PER_ITERATION = 45
+EPOCHS = 10
+SIMULATIONS = 50
+BATCH_SIZE = 512
 
-for iteration in range(10):
+# 🔧 What You Increase	        🧠 What It Improves	                       Time Cost
+# Iteration count               Long-term learning, generalization          High
+# Game count per iteration	    More diverse data per iteration	            Medium
+# Epochs per iteration	        Better fitting to current data	            Low
+
+start_time = time.time()
+for iteration in range(ITERATIONS):
     print(f"=== Self-play iteration {iteration + 1} ===")
     training_data = []
-    for _ in range(5):  # 5 self-play games per iteration
-        game_data = play_self_game(net)
+    for _ in range(GAMES_PER_ITERATION):  # 5 self-play games per iteration
+        game_data = play_self_game(net, sims=SIMULATIONS)
         training_data.extend(game_data)
 
     print(f"Collected {len(training_data)} training samples.")
-    train(net, training_data, epochs=5)
+    train(net, training_data, epochs=EPOCHS, batch_size=BATCH_SIZE)
+    end_time = time.time()
+    elapsed_time = end_time - start_time
+    print(f"Iteration {iteration + 1} took {elapsed_time:.2f} seconds.")
+    start_time = end_time
 
 
 # Save

@@ -118,6 +118,7 @@ class State:
                 print("Checkpoint... {}".format(i))
                 self.p1.saveCheckpoint(i)
                 self.p2.saveCheckpoint(i)
+                print("exploration rate p1: {}, p2: {}".format(self.p1.exp_rate, self.p2.exp_rate))
 
             while not self.isEnd:
                 # Player 1
@@ -156,6 +157,9 @@ class State:
                         self.p2.reset()
                         self.reset()
                         break
+
+            self.p1.decayExploration()
+            self.p2.decayExploration()
 
     # play with human
     def play2(self):
@@ -216,8 +220,17 @@ class Player:
         self.states = []  # record all positions taken
         self.lr = 0.2
         self.exp_rate = exp_rate
+        self.decay_rate = 1 - 10e-4
+        self.min_exp_rate = 0.01
         self.decay_gamma = 0.9
         self.states_value = {}  # state -> value
+
+    '''
+    Exploration rate decay.
+    As the training progresses, the exploration rate decreases, allowing the agent to exploit its learned policy more.
+    '''
+    def decayExploration(self):
+        self.exp_rate = max(self.min_exp_rate, self.exp_rate * self.decay_rate)
 
     def getHash(self, board):
         boardHash = str(board.reshape(BOARD_COLS * BOARD_ROWS))
@@ -317,16 +330,16 @@ if __name__ == "__main__":
     # ------- traning end --------
 
     # ------- continue training --------
-    p1 = Player("p1")
-    p1.loadPolicy("policy_p1")
-    p2 = Player("p2")
-    p2.loadPolicy("policy_p2")
-    st = State(p1, p2)
-    print("Continuing training...")
-    st.play(30000)
-    p1.savePolicy()
-    p2.savePolicy()
-    print("Continuing training done!")
+    # p1 = Player("p1")
+    # p1.loadPolicy("policy_p1")
+    # p2 = Player("p2")
+    # p2.loadPolicy("policy_p2")
+    # st = State(p1, p2)
+    # print("Continuing training...")
+    # st.play(10000)
+    # p1.savePolicy()
+    # p2.savePolicy()
+    # print("Continuing training done!")
     # ------- continue training end --------
 
 

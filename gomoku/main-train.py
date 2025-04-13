@@ -8,14 +8,18 @@ import time
 import torch
 device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 
-# net = GomokuNet()
 net = GomokuNet().to(device)
-net.load_state_dict(torch.load("gomoku_net.pt"))
+
+
 ITERATIONS = 1
 GAMES_PER_ITERATION = 1
 EPOCHS = 30
 SIMULATIONS = 200
 BATCH_SIZE = 1024
+VERBOSE = True  # Do not run with more than 1 game per iteration
+LOAD_MODEL = True  # Load model to continue training
+SAVE_MODEL = False  # Save model after training
+FILE_NAME = "gomoku_net.pt"  # Model file name
 
 # | What You Increase           | What It Improves                      | Time Cost
 # ----------------------------------------------------------------------------------
@@ -25,12 +29,16 @@ BATCH_SIZE = 1024
 # | Simulation count per game   | Better move selection per game        | High
 # | Training batch size         | Faster epochs                         | Medium
 
+if LOAD_MODEL:
+    net.load_state_dict(torch.load(FILE_NAME))
+    print("Model loaded.")
+
 start_time = time.time()
 for iteration in range(ITERATIONS):
     print(f"=== Self-play iteration {iteration + 1} ===")
     training_data = []
-    for _ in range(GAMES_PER_ITERATION):  # 5 self-play games per iteration
-        game_data = play_self_game(net, sims=SIMULATIONS, verbose=True)
+    for _ in range(GAMES_PER_ITERATION):
+        game_data = play_self_game(net, sims=SIMULATIONS, verbose=VERBOSE)
         training_data.extend(game_data)
 
     print(f"Collected {len(training_data)} training samples.")
@@ -46,7 +54,9 @@ for iteration in range(ITERATIONS):
 
 
 # Save
-# torch.save(net.state_dict(), "gomoku_net.pt")
+if SAVE_MODEL:
+    torch.save(net.state_dict(), FILE_NAME)
+    print("Model saved.")
 
 # Load
 net = GomokuNet()

@@ -3,3 +3,5 @@
 /old_policy
 
 **.pkl
+
+**/__pycache__/

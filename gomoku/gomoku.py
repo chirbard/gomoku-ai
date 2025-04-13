@@ -84,7 +84,7 @@ class Gomoku:
         return self.winner is not None
 
     def render(self):
-        symbol = {1: 'X', -1: 'O', 0: '.'}
+        symbol = {1: 'X', 2: 'O', 0: '.'}
         for row in self.board:
             print(' '.join(symbol[cell] for cell in row))
         print()

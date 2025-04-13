@@ -6,10 +6,24 @@ class Gomoku:
     def __init__(self, size=BOARD_SIZE, win_length=WIN_LENGTH):
         self.size = size
         self.win_length = win_length
-        self.board = np.zeros((size, size), dtype=int)
         self.current_player = 1
         self.winner = None
         self.last_move = None
+        self.board = np.zeros((self.size, self.size), dtype=int)
+        self.generate_board()
+
+    def generate_board(self):
+        # generates board with 3 pieces in random locations
+        self.board = np.zeros((self.size, self.size), dtype=int)
+        self.current_player = -1
+        for _ in range(3):
+            while True:
+                x, y = np.random.randint(0, self.size, size=2)
+                if self.board[x, y] == 0:
+                    self.board[x, y] = self.current_player
+                    break
+            self.current_player = -self.current_player
+        self.current_player = 1  # reset to player 1
 
     def clone(self):
         clone = Gomoku(self.size, self.win_length)
@@ -21,6 +35,17 @@ class Gomoku:
 
     def get_legal_moves(self):
         return [(i, j) for i in range(self.size) for j in range(self.size) if self.board[i, j] == 0]
+
+    # TODO kasuta seda et järgmiseid liigutusi genereerida
+    def moves_next_to_pieces(self):
+        next_moves = []
+        for i in range(self.size):
+            for j in range(self.size):
+                if self.board[i, j] == 0:
+                    if any(0 <= x < self.size and 0 <= y < self.size and self.board[x, y] != 0
+                           for x in (i - 1, i, i + 1) for y in (j - 1, j, j + 1)):
+                        next_moves.append((i, j))
+        return next_moves
 
     def apply_move(self, move):
         if self.board[move] != 0:

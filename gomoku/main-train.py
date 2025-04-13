@@ -10,9 +10,9 @@ device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 
 # net = GomokuNet()
 net = GomokuNet().to(device)
-ITERATIONS = 50
-GAMES_PER_ITERATION = 100
-EPOCHS = 400
+ITERATIONS = 60
+GAMES_PER_ITERATION = 10
+EPOCHS = 30
 SIMULATIONS = 50
 BATCH_SIZE = 1024
 
@@ -38,6 +38,10 @@ for iteration in range(ITERATIONS):
     elapsed_time = end_time - start_time
     print(f"Iteration {iteration + 1} took {elapsed_time:.2f} seconds.")
     start_time = end_time
+    if iteration % 5 == 0:
+        # Save the model every 5 iterations
+        torch.save(net.state_dict(), f"checkpoints/gomoku_net_{iteration}.pt")
+        print(f"Model saved at iteration {iteration}.")
 
 
 # Save

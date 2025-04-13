@@ -82,7 +82,8 @@ class MCTS:
         return -v  # Because next player played
 
     def _legal_moves(self, game):
-        return game.get_legal_moves()
+        return game.moves_next_to_pieces()
+        # return game.get_legal_moves()
 
     def _stringify(self, game):
         # Convert current_player (-1 or 1) to 0 or 1

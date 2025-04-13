@@ -10,10 +10,11 @@ device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 
 # net = GomokuNet()
 net = GomokuNet().to(device)
-ITERATIONS = 60
-GAMES_PER_ITERATION = 10
+net.load_state_dict(torch.load("gomoku_net.pt"))
+ITERATIONS = 1
+GAMES_PER_ITERATION = 1
 EPOCHS = 30
-SIMULATIONS = 50
+SIMULATIONS = 200
 BATCH_SIZE = 1024
 
 # | What You Increase           | What It Improves                      | Time Cost
@@ -29,7 +30,7 @@ for iteration in range(ITERATIONS):
     print(f"=== Self-play iteration {iteration + 1} ===")
     training_data = []
     for _ in range(GAMES_PER_ITERATION):  # 5 self-play games per iteration
-        game_data = play_self_game(net, sims=SIMULATIONS)
+        game_data = play_self_game(net, sims=SIMULATIONS, verbose=True)
         training_data.extend(game_data)
 
     print(f"Collected {len(training_data)} training samples.")
@@ -45,7 +46,7 @@ for iteration in range(ITERATIONS):
 
 
 # Save
-torch.save(net.state_dict(), "gomoku_net.pt")
+# torch.save(net.state_dict(), "gomoku_net.pt")
 
 # Load
 net = GomokuNet()

@@ -5,10 +5,15 @@ from mcts import MCTS
 from constants import BOARD_SIZE
 
 
-def play_self_game(net, board_size=BOARD_SIZE, sims=50):
+def play_self_game(net, board_size=BOARD_SIZE, sims=50, verbose=False):
     game = Gomoku(size=board_size)
     mcts = MCTS(net, num_simulations=sims)
     memory = []
+
+    move_count = 0
+    if verbose:
+        print("===== Starting new self-play game =====")
+        game.render()
 
     while not game.is_terminal():
         # Run MCTS to get improved policy
@@ -26,6 +31,19 @@ def play_self_game(net, board_size=BOARD_SIZE, sims=50):
         moves, probs = zip(*pi_dict.items())
         move = moves[np.random.choice(len(moves), p=probs)]
         game.apply_move(move)
+
+        move_count += 1
+        if verbose:
+            print(
+                f"Move {move_count}: Player {game.current_player} played at {move}")
+            game.render()
+
+    # Show game result if verbose
+    if verbose:
+        if game.winner == 0:
+            print("Game ended in a draw")
+        else:
+            print(f"Game won by player {game.winner}")
 
     # Assign game result
     result = game.winner

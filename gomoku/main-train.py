@@ -13,8 +13,8 @@ net = GomokuNet().to(device)
 
 ITERATIONS = 1
 GAMES_PER_ITERATION = 1
-EPOCHS = 30
-SIMULATIONS = 2
+EPOCHS = 10
+SIMULATIONS = 200
 BATCH_SIZE = 1024
 VERBOSE = True  # Do not run with more than 1 game per iteration
 LOAD_MODEL = True  # Load model to continue training

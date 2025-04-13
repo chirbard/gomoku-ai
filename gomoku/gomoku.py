@@ -6,7 +6,7 @@ class Gomoku:
     def __init__(self, size=BOARD_SIZE, win_length=WIN_LENGTH):
         self.size = size
         self.win_length = win_length
-        self.current_player = 1
+        self.current_player = 1  # Start with player 1
         self.winner = None
         self.last_move = None
         self.board = np.zeros((self.size, self.size), dtype=int)
@@ -15,14 +15,15 @@ class Gomoku:
     def generate_board(self):
         # generates board with 3 pieces in random locations
         self.board = np.zeros((self.size, self.size), dtype=int)
-        self.current_player = -1
+        self.current_player = 2  # Start placing with player 2
         for _ in range(3):
             while True:
                 x, y = np.random.randint(0, self.size, size=2)
                 if self.board[x, y] == 0:
                     self.board[x, y] = self.current_player
                     break
-            self.current_player = -self.current_player
+            # Switch between players 1 and 2
+            self.current_player = 1 if self.current_player == 2 else 2
         self.current_player = 1  # reset to player 1
 
     def clone(self):
@@ -47,6 +48,7 @@ class Gomoku:
                         next_moves.append((i, j))
         return next_moves
 
+    # Change player switching logic
     def apply_move(self, move):
         if self.board[move] != 0:
             raise ValueError("Illegal move")
@@ -57,7 +59,8 @@ class Gomoku:
         elif np.all(self.board != 0):
             self.winner = 0  # draw
         else:
-            self.current_player *= -1
+            # Change this line
+            self.current_player = 2 if self.current_player == 1 else 1
 
     def check_win(self, move):
         x, y = move
@@ -81,14 +84,7 @@ class Gomoku:
         return self.winner is not None
 
     def render(self):
-        symbol = {1: 'X', -1: 'O', 0: '.'}
+        symbol = {1: 'X', 2: 'O', 0: '.'}
         for row in self.board:
             print(' '.join(symbol[cell] for cell in row))
         print()
-
-
-# game = Gomoku()
-# game.render()
-# game.apply_move((0, 0))
-# game.apply_move((1, 1))
-# game.render()

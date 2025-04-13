@@ -86,6 +86,5 @@ class MCTS:
         # return game.get_legal_moves()
 
     def _stringify(self, game):
-        # Convert current_player (-1 or 1) to 0 or 1
-        player_id = 0 if game.current_player == -1 else 1
+        player_id = 0 if game.current_player == 2 else 1
         return game.board.tobytes() + bytes([player_id])

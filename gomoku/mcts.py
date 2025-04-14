@@ -83,7 +83,6 @@ class MCTS:
 
     def _legal_moves(self, game):
         return game.moves_next_to_pieces()
-        # return game.get_legal_moves()
 
     def _stringify(self, game):
         player_id = 0 if game.current_player == 2 else 1

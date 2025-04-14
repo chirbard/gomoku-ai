@@ -19,10 +19,10 @@ if USE_WANDB:
     wandb.init(
         project="gomoku-training",  # Your project name
         config={
-            "iterations": 5,
-            "games_per_iteration": 1,
-            "epochs": 10,
-            "simulations": 2,
+            "iterations": 200,
+            "games_per_iteration": 10,
+            "epochs": 200,
+            "simulations": 200,
             "batch_size": 1024,
             "board_size": 15,  # From constants.py
             "win_length": 5,    # From constants.py
@@ -31,14 +31,16 @@ if USE_WANDB:
     )
 
 ITERATIONS = wandb.config.iterations if USE_WANDB else 200
-GAMES_PER_ITERATION = wandb.config.games_per_iteration if USE_WANDB else 20
-EPOCHS = wandb.config.epochs if USE_WANDB else 150
+GAMES_PER_ITERATION = wandb.config.games_per_iteration if USE_WANDB else 10
+EPOCHS = wandb.config.epochs if USE_WANDB else 200
 SIMULATIONS = wandb.config.simulations if USE_WANDB else 200
 BATCH_SIZE = wandb.config.batch_size if USE_WANDB else 1024
 VERBOSE = False  # Do not run with more than 1 game per iteration
-LOAD_MODEL = False  # Load model to continue training
+LOAD_MODEL = True  # Load model to continue training
 SAVE_MODEL = True  # Save model after training
-FILE_NAME = "gomoku_net.pt"  # Model file name
+LOAD_FILE_NAME = "gomoku_net.pt"
+SAVE_FILE_NAME = "gomoku_net_final.pt"
+CHECKPOINT_EVERY_N_ITERATIONS = 2  # Save model every N iterations
 
 # | What You Increase           | What It Improves                      | Time Cost
 # ----------------------------------------------------------------------------------
@@ -50,7 +52,7 @@ FILE_NAME = "gomoku_net.pt"  # Model file name
 
 os.makedirs('checkpoints', exist_ok=True)
 if LOAD_MODEL:
-    net.load_state_dict(torch.load(FILE_NAME))
+    net.load_state_dict(torch.load(LOAD_FILE_NAME))
     print("Model loaded.")
 
 start_time = time.time()
@@ -82,7 +84,7 @@ for iteration in range(ITERATIONS):
         wandb.log(metrics)
 
     start_time = end_time
-    if iteration % 5 == 0:
+    if iteration % CHECKPOINT_EVERY_N_ITERATIONS == 0:
         # Save the model every 5 iterations
         checkpoint_path = f"checkpoints/gomoku_net_{iteration}.pt"
         torch.save(net.state_dict(), checkpoint_path)
@@ -98,12 +100,11 @@ for iteration in range(ITERATIONS):
 
 # Save final model
 if SAVE_MODEL:
-    torch.save(net.state_dict(), FILE_NAME)
+    torch.save(net.state_dict(), SAVE_FILE_NAME)
     print("Model saved.")
     if USE_WANDB:
-        # wandb.save(FILE_NAME)
         artifact = wandb.Artifact('final-model', type='model')
-        artifact.add_file(FILE_NAME)
+        artifact.add_file(SAVE_FILE_NAME)
         wandb.log_artifact(artifact)
 
 # Finish wandb run

@@ -11,14 +11,14 @@ device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 net = GomokuNet().to(device)
 
 
-ITERATIONS = 1
-GAMES_PER_ITERATION = 1
-EPOCHS = 10
+ITERATIONS = 200
+GAMES_PER_ITERATION = 20
+EPOCHS = 150
 SIMULATIONS = 200
 BATCH_SIZE = 1024
-VERBOSE = True  # Do not run with more than 1 game per iteration
-LOAD_MODEL = True  # Load model to continue training
-SAVE_MODEL = False  # Save model after training
+VERBOSE = False  # Do not run with more than 1 game per iteration
+LOAD_MODEL = False  # Load model to continue training
+SAVE_MODEL = True  # Save model after training
 FILE_NAME = "gomoku_net.pt"  # Model file name
 
 # | What You Increase           | What It Improves                      | Time Cost

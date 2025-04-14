@@ -3,28 +3,30 @@ from constants import WIN_LENGTH, BOARD_SIZE
 
 
 class Gomoku:
-    def __init__(self, size=BOARD_SIZE, win_length=WIN_LENGTH):
+    def __init__(self, size=BOARD_SIZE, win_length=WIN_LENGTH, generate_board=True):
         self.size = size
         self.win_length = win_length
-        self.current_player = 1  # Start with player 1
+        self.current_player = 1
         self.winner = None
         self.last_move = None
         self.board = np.zeros((self.size, self.size), dtype=int)
-        self.generate_board()
+        if generate_board:
+            self.generate_board()
 
     def generate_board(self):
-        # generates board with 3 pieces in random locations
+        """
+        Generates a random board with 3 pieces.
+        """
         self.board = np.zeros((self.size, self.size), dtype=int)
-        self.current_player = 2  # Start placing with player 2
+        self.current_player = 2
         for _ in range(3):
             while True:
                 x, y = np.random.randint(0, self.size, size=2)
                 if self.board[x, y] == 0:
                     self.board[x, y] = self.current_player
                     break
-            # Switch between players 1 and 2
             self.current_player = 1 if self.current_player == 2 else 2
-        self.current_player = 1  # reset to player 1
+        self.current_player = 1
 
     def clone(self):
         clone = Gomoku(self.size, self.win_length)
@@ -37,7 +39,6 @@ class Gomoku:
     def get_legal_moves(self):
         return [(i, j) for i in range(self.size) for j in range(self.size) if self.board[i, j] == 0]
 
-    # TODO kasuta seda et järgmiseid liigutusi genereerida
     def moves_next_to_pieces(self):
         next_moves = []
         for i in range(self.size):
@@ -48,7 +49,6 @@ class Gomoku:
                         next_moves.append((i, j))
         return next_moves
 
-    # Change player switching logic
     def apply_move(self, move):
         if self.board[move] != 0:
             raise ValueError("Illegal move")
@@ -57,9 +57,8 @@ class Gomoku:
         if self.check_win(move):
             self.winner = self.current_player
         elif np.all(self.board != 0):
-            self.winner = 0  # draw
+            self.winner = 0
         else:
-            # Change this line
             self.current_player = 2 if self.current_player == 1 else 1
 
     def check_win(self, move):

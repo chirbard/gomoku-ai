@@ -5,16 +5,11 @@ from mcts import MCTS
 from train import train
 import torch
 
-# Step 1: Init
 device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 net = GomokuNet().to(device)
-net.load_state_dict(torch.load("gomoku_net.pt"))  # optional if you trained it
+net.load_state_dict(torch.load("gomoku_net.pt"))
 net.eval()
-
-# Step 2: New game
 game = Gomoku()
-
-# Step 3: Setup MCTS
 mcts = MCTS(net, num_simulations=50)
 
 # Game loop
@@ -42,7 +37,6 @@ while not game.is_terminal():
     game.apply_move(ai_move)
     print("AI's move:", ai_move)
 
-# Game over
 game.render()
 if game.winner is None:
     print("It's a draw!")

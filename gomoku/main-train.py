@@ -11,6 +11,7 @@ device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 
 net = GomokuNet().to(device)
 
+# os.environ["WANDB_SYMLINK"] = "false"
 USE_WANDB = True  # Set to False to disable wandb
 if USE_WANDB:
     import wandb
@@ -18,10 +19,10 @@ if USE_WANDB:
     wandb.init(
         project="gomoku-training",  # Your project name
         config={
-            "iterations": 200,
-            "games_per_iteration": 20,
-            "epochs": 150,
-            "simulations": 200,
+            "iterations": 5,
+            "games_per_iteration": 1,
+            "epochs": 10,
+            "simulations": 2,
             "batch_size": 1024,
             "board_size": 15,  # From constants.py
             "win_length": 5,    # From constants.py
@@ -88,7 +89,11 @@ for iteration in range(ITERATIONS):
         print(f"Model saved at iteration {iteration}.")
 
         if USE_WANDB:
-            wandb.save(checkpoint_path)
+            # wandb.save(checkpoint_path)
+            artifact = wandb.Artifact(
+                f'model-checkpoint-{iteration}', type='model')
+            artifact.add_file(checkpoint_path)
+            wandb.log_artifact(artifact)
 
 
 # Save final model
@@ -96,7 +101,10 @@ if SAVE_MODEL:
     torch.save(net.state_dict(), FILE_NAME)
     print("Model saved.")
     if USE_WANDB:
-        wandb.save(FILE_NAME)
+        # wandb.save(FILE_NAME)
+        artifact = wandb.Artifact('final-model', type='model')
+        artifact.add_file(FILE_NAME)
+        wandb.log_artifact(artifact)
 
 # Finish wandb run
 if USE_WANDB:

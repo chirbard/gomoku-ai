@@ -1,4 +1,6 @@
 ## Gomoku AI
+### model on hugging face
+https://huggingface.co/chirbard/gomoku-ai/tree/main
 ### Training
 main-train.py file
 ### Playing

@@ -48,8 +48,24 @@ def play_self_game(net, board_size=BOARD_SIZE, sims=50, verbose=False):
     # Assign game result
     result = game.winner
     training_data = []
+
+    # Calculate move efficiency factor (higher reward for shorter games)
+    max_possible_moves = board_size * board_size
+    speed_factor = max(0.5, 1.0 - (move_count / max_possible_moves))
+
+    if verbose:
+        print(f"Game length: {move_count} moves")
+        print(f"Speed factor: {speed_factor:.2f}")
+
     for state_tensor, pi, player in memory:
-        reward = 1 if result == player else -1 if result != 0 else 0
+        if result == 0:  # Draw
+            reward = 0
+        elif result == player:  # Win
+            # Increase reward for faster wins
+            reward = 1.0 * (1.0 + speed_factor)
+        else:  # Loss
+            reward = -1.0
+
         training_data.append((state_tensor, pi, reward))
 
     return training_data

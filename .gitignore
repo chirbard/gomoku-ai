@@ -3,5 +3,8 @@
 /old_policy
 
 **.pkl
+**.pt
 
-**/__pycache__/
+**/__pycache__/*
+
+**/wandb/*

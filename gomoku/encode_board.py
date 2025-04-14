@@ -7,6 +7,8 @@ def encode_board(game: Gomoku):
     """
     Converts a Gomoku board to a 2-channel PyTorch tensor.
 
+    Needed for the neural network to be able to play both players.
+
     Channel 0: current player's stones (1)
     Channel 1: opponent's stones (1)
 
@@ -17,7 +19,6 @@ def encode_board(game: Gomoku):
     board = game.board
 
     player_plane = (board == current_player).astype(float)
-    # Change this line to handle opponent as 1 or 2
     opponent_player = 1 if current_player == 2 else 2
     opponent_plane = (board == opponent_player).astype(float)
 

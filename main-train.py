@@ -40,7 +40,7 @@ LOAD_MODEL = True  # Load model to continue training
 SAVE_MODEL = True  # Save model after training
 LOAD_FILE_NAME = "gomoku_net.pt"
 SAVE_FILE_NAME = "gomoku_net_final.pt"
-CHECKPOINT_EVERY_N_ITERATIONS = 2  # Save model every N iterations
+CHECKPOINT_EVERY_N_ITERATIONS = 5  # Save model every N iterations
 
 # | What You Increase           | What It Improves                      | Time Cost
 # ----------------------------------------------------------------------------------

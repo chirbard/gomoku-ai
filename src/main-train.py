@@ -18,10 +18,10 @@ if USE_WANDB:
     wandb.init(
         project="gomoku-training",
         config={
-            "iterations": 200,
-            "games_per_iteration": 10,
-            "epochs": 200,
-            "simulations": 200,
+            "iterations": 1,
+            "games_per_iteration": 1,
+            "epochs": 1,
+            "simulations": 100,
             "batch_size": 1024,
             "board_size": 15,
             "win_length": 5,
@@ -34,9 +34,9 @@ GAMES_PER_ITERATION = wandb.config.games_per_iteration if USE_WANDB else 10
 EPOCHS = wandb.config.epochs if USE_WANDB else 200
 SIMULATIONS = wandb.config.simulations if USE_WANDB else 200
 BATCH_SIZE = wandb.config.batch_size if USE_WANDB else 1024
-VERBOSE = False  # Do not run with more than 1 game per iteration
+VERBOSE = True  # Do not run with more than 1 game per iteration
 LOAD_MODEL = True  # Load model to continue training
-SAVE_MODEL = True  # Save model after training
+SAVE_MODEL = False  # Save model after training
 LOAD_FILE_NAME = "gomoku_net.pt"
 SAVE_FILE_NAME = "gomoku_net_final.pt"
 CHECKPOINT_EVERY_N_ITERATIONS = 5  # Save model every N iterations

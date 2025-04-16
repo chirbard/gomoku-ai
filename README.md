@@ -8,7 +8,7 @@ Reinforcement Learning agent that plays Gomoku. Model uses AlphaZero style archi
 
 ## Features
 
-### Easily adapable to any size board
+### Easily adaptable to any size board
 
 Just change the values inside `constants.py` file.
 
@@ -17,7 +17,7 @@ Just change the values inside `constants.py` file.
 Overview on training on Weights and Biases.
 ![Weights and Biases dashboard](image.png)
 
-### model on hugging face
+### Model on hugging face
 
 https://huggingface.co/chirbard/gomoku-ai/tree/main
 

@@ -12,16 +12,11 @@ net.eval()
 game = Gomoku()
 mcts = MCTS(net, num_simulations=50)
 
-# Game loop
 while not game.is_terminal():
-    # Human move
     game.render()
     print("Your turn! Enter your move as 'row,col':")
     try:
         human_move = tuple(map(int, input().strip().split(',')))
-        # if not game.is_valid_move(human_move):
-        #     print("Invalid move. Try again.")
-        #     continue
         game.apply_move(human_move)
     except ValueError:
         print("Invalid input format. Please enter row and column as 'row,col'.")
@@ -30,8 +25,6 @@ while not game.is_terminal():
     if game.is_terminal():
         break
 
-    # AI move
-    # 0 = always pick best move
     probs = mcts.get_action_probs(game, temperature=0)
     ai_move = max(probs.items(), key=lambda x: x[1])[0]
     game.apply_move(ai_move)

@@ -36,7 +36,6 @@ def train(net, data, batch_size=32, epochs=5, lr=1e-3, return_metrics=False):
             v_pred = v_pred.squeeze(1)
             value_loss = F.mse_loss(v_pred, target_vs)
 
-            # Normalize by batch size
             policy_loss = -torch.sum(target_pis * log_pi_pred) / states.size(0)
             loss = value_loss + policy_loss
 

@@ -11,21 +11,20 @@ device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 
 net = GomokuNet().to(device)
 
-# os.environ["WANDB_SYMLINK"] = "false"
-USE_WANDB = True  # Set to False to disable wandb
+USE_WANDB = True
 if USE_WANDB:
     import wandb
-    wandb.login()  # You'll need to authenticate first time
+    wandb.login()
     wandb.init(
-        project="gomoku-training",  # Your project name
+        project="gomoku-training",
         config={
             "iterations": 200,
             "games_per_iteration": 10,
             "epochs": 200,
             "simulations": 200,
             "batch_size": 1024,
-            "board_size": 15,  # From constants.py
-            "win_length": 5,    # From constants.py
+            "board_size": 15,
+            "win_length": 5,
             "architecture": "GomokuNet"
         }
     )
@@ -64,7 +63,6 @@ for iteration in range(ITERATIONS):
         training_data.extend(game_data)
 
     print(f"Collected {len(training_data)} training samples.")
-    # train(net, training_data, epochs=EPOCHS, batch_size=BATCH_SIZE)
     loss_metrics = train(net, training_data, epochs=EPOCHS,
                          batch_size=BATCH_SIZE, return_metrics=True)
 
@@ -85,20 +83,17 @@ for iteration in range(ITERATIONS):
 
     start_time = end_time
     if iteration % CHECKPOINT_EVERY_N_ITERATIONS == 0:
-        # Save the model every 5 iterations
         checkpoint_path = f"checkpoints/gomoku_net_{iteration}.pt"
         torch.save(net.state_dict(), checkpoint_path)
         print(f"Model saved at iteration {iteration}.")
 
         if USE_WANDB:
-            # wandb.save(checkpoint_path)
             artifact = wandb.Artifact(
                 f'model-checkpoint-{iteration}', type='model')
             artifact.add_file(checkpoint_path)
             wandb.log_artifact(artifact)
 
 
-# Save final model
 if SAVE_MODEL:
     torch.save(net.state_dict(), SAVE_FILE_NAME)
     print("Model saved.")
@@ -107,6 +102,5 @@ if SAVE_MODEL:
         artifact.add_file(SAVE_FILE_NAME)
         wandb.log_artifact(artifact)
 
-# Finish wandb run
 if USE_WANDB:
     wandb.finish()
